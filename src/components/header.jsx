@@ -3,7 +3,9 @@ import { PenBox, FolderOpen } from "lucide-react";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Button } from "./ui/button";
 import UserMenu from "./user-menu";
-const Header = () => {
+import { checkUser } from "@/lib/checkUser";
+const Header = async () => {
+  await checkUser();
   return (
     <header>
       <nav className="py-6 px-4 flex justify-between items-center">
@@ -28,9 +30,7 @@ const Header = () => {
           </Link>
           <SignedOut>
             <SignInButton forceRedirectUrl="/dashboard">
-              <Button variant="outline">
-                Login
-              </Button>
+              <Button variant="outline">Login</Button>
             </SignInButton>
           </SignedOut>
           <SignedIn>
