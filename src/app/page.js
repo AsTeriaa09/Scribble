@@ -12,7 +12,6 @@ export default function Home() {
       <div className="relative container mx-auto px-4 pt-16 pb-16">
         <HeroSection />
         <FeatureCards />
-
         <TestimonialCarousel />
         <Faq />
         <Cta />
