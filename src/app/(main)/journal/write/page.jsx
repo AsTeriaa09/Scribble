@@ -194,11 +194,6 @@ const JournalEntryPage = () => {
                   <SelectValue placeholder="Choose a collection..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* {collections?.map((collection) => (
-                    <SelectItem key={collection.id} value={collection.id}>
-                      {collection.name}
-                    </SelectItem>
-                  ))} */}
                   <SelectItem value="new">
                     <span className="text-orange-600">
                       + Create New Collection
@@ -212,7 +207,6 @@ const JournalEntryPage = () => {
 
         <div className="space-x-4 flex">
           <Button type="submit" variant="journal" disabled={actionLoading}>
-           
             Publish
           </Button>
         </div>
