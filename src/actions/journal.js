@@ -46,7 +46,7 @@ export async function createJournalEntry(data) {
 
     await db.draft.deleteMany({
       where: {
-        useId: user.id,
+        userId: user.id,
       },
     });
 
