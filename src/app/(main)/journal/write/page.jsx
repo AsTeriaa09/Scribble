@@ -16,30 +16,37 @@ import {
 import useFetch from "@/hooks/use-fetch";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-// import {
-//   createJournalEntry,
-//   updateJournalEntry,
-//   getJournalEntry,
-//   getDraft,
-//   saveDraft,
-// } from "@/actions/journal";
-// import { createCollection, getCollections } from "@/actions/collection";
+import { createJournalEntry } from "@/actions/journal";
+import { createCollection, getCollections } from "@/actions/collection";
 import { getMoodById, MOODS } from "@/app/lib/moods";
 import { BarLoader } from "react-spinners";
 import { toast } from "sonner";
 import { journalSchema } from "@/app/lib/schemas";
 import "react-quill-new/dist/quill.snow.css";
-import { createJournalEntry } from "@/actions/journal";
-// import CollectionForm from "@/components/collection-form";
+import CollectionForm from "@/components/collection-form";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
 const JournalEntryPage = () => {
+  const [isCollectionDialogOpen, setIsCollectionDialogOpen] = useState(false);
+
   const {
     loading: actionLoading,
     fn: actionFn,
     data: actionResult,
   } = useFetch(createJournalEntry);
+
+  const {
+    loading: collectionLoading,
+    data: collections,
+    fn: fetchCollections,
+  } = useFetch(getCollections);
+
+  const {
+    loading: createCollectionLoading,
+    data: createdCollection,
+    fn: createCollectionFn,
+  } = useFetch(createCollection);
 
   const router = useRouter();
 
@@ -63,6 +70,10 @@ const JournalEntryPage = () => {
   });
 
   useEffect(() => {
+    fetchCollections();
+  }, []);
+
+  useEffect(() => {
     if (actionResult && !actionLoading) {
       router.push(
         `/collection/${
@@ -82,7 +93,20 @@ const JournalEntryPage = () => {
     });
   });
 
-  const isLoading = actionLoading;
+  useEffect(() => {
+    if (createCollection) {
+      setIsCollectionDialogOpen(false);
+      fetchCollections();
+      setValue("collectionId", createCollection.id);
+      toast.success(`Collection created!`);
+    }
+  }, [createdCollection]);
+
+  const handleCreateCollection = async (data) => {
+    createCollectionFn(data);
+  };
+
+  const isLoading = actionLoading || collectionLoading;
 
   return (
     <div>
@@ -194,6 +218,11 @@ const JournalEntryPage = () => {
                   <SelectValue placeholder="Choose a collection..." />
                 </SelectTrigger>
                 <SelectContent>
+                  {collections?.map((collection) => (
+                    <SelectItem key={collection.id} value={collection.id}>
+                      {collection.name}
+                    </SelectItem>
+                  ))}
                   <SelectItem value="new">
                     <span className="text-orange-600">
                       + Create New Collection
@@ -211,6 +240,13 @@ const JournalEntryPage = () => {
           </Button>
         </div>
       </form>
+
+      <CollectionForm
+        loading={createCollectionLoading}
+        open={isCollectionDialogOpen}
+        onSuccess={handleCreateCollection}
+        setOpen={setIsCollectionDialogOpen}
+      />
     </div>
   );
 };
