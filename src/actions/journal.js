@@ -79,7 +79,10 @@ export async function createJournalEntry(data) {
   }
 }
 
-export async function getJournalEntries({ collectionId, orderBy = "desc" }) {
+export async function getJournalEntries({
+  collectionId,
+  orderBy = "desc",
+} = {}) {
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
@@ -102,7 +105,7 @@ export async function getJournalEntries({ collectionId, orderBy = "desc" }) {
       include: {
         collection: {
           select: {
-            if: true,
+            id: true,
             name: true,
           },
         },
