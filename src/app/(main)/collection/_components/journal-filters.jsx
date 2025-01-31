@@ -27,6 +27,34 @@ const JournalFilters = ({ entries }) => {
   const [date, setDate] = useState(null);
   const [filteredEntries, setFilteredEntries] = useState(entries);
 
+  useEffect(() => {
+     let filtered = entries;
+ 
+     // Apply search filter
+     if (searchQuery) {
+       const query = searchQuery.toLowerCase();
+       filtered = filtered.filter(
+         (entry) =>
+           entry.title.toLowerCase().includes(query) ||
+           entry.content.toLowerCase().includes(query)
+       );
+     }
+ 
+     // Apply mood filter
+     if (selectedMood) {
+       filtered = filtered.filter((entry) => entry.mood === selectedMood);
+     }
+ 
+     // Apply date filter
+     if (date) {
+       filtered = filtered.filter((entry) =>
+         isSameDay(new Date(entry.createdAt), date)
+       );
+     }
+ 
+     setFilteredEntries(filtered);
+   }, [entries, searchQuery, selectedMood, date]);
+
   const clearFilters = () => {
     setSearchQuery("");
     setSelectedMood("");
