@@ -20,17 +20,18 @@ import { format, isSameDay } from "date-fns";
 import { Calendar as CalendarIcon, Search } from "lucide-react";
 import { MOODS } from "@/app/lib/moods";
 import { cn } from "@/lib/utils";
-const JournalFilters = ({entries}) => {
+import EntryCard from "@/components/entry-card";
+const JournalFilters = ({ entries }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMood, setSelectedMood] = useState("");
   const [date, setDate] = useState(null);
   const [filteredEntries, setFilteredEntries] = useState(entries);
 
   const clearFilters = () => {
-     setSearchQuery("");
-     setSelectedMood("");
-     setDate(null);
-   };
+    setSearchQuery("");
+    setSelectedMood("");
+    setDate(null);
+  };
 
   return (
     <>
@@ -94,8 +95,23 @@ const JournalFilters = ({entries}) => {
           </Button>
         )}
       </div>
+      {/* Results Summary */}
+      <div className="text-sm text-gray-500">
+        Showing {filteredEntries.length} of {entries.length} entries
+      </div>
 
-
+      {/* Entries List */}
+      {filteredEntries.length === 0 ? (
+        <div className="text-center p-8">
+          <p className="text-gray-500">No entries found</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {filteredEntries.map((entry) => (
+            <EntryCard key={entry.id} entry={entry} />
+          ))}
+        </div>
+      )}
     </>
   );
 };
