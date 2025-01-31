@@ -113,7 +113,7 @@ export async function getSingleCollection(collectionId) {
         userId: user.id,
         id: collectionId,
       },
-      orderBy: { createdAt: "desc" },
+     
     });
 
     return singleCollections;
