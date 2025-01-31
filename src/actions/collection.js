@@ -1,4 +1,4 @@
-"use server"
+"use server";
 import { auth } from "@clerk/nextjs/server";
 import { request } from "@arcjet/next";
 import aj from "@/lib/arcjet";
@@ -86,6 +86,37 @@ export async function getCollections() {
     });
 
     return collections;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function getSingleCollection(collectionId) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    // check if user exists
+    const user = await db.user.findUnique({
+      where: {
+        clerkUserId: userId,
+      },
+    });
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const singleCollections = await db.collection.findUnique({
+      where: {
+        userId: user.id,
+        id: collectionId,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return singleCollections;
   } catch (error) {
     throw new Error(error.message);
   }
