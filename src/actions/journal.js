@@ -136,7 +136,7 @@ export async function getJournalEntries({
   }
 }
 
-export async function getSingleJournalEntry(id){
+export async function getSingleJournalEntry(id) {
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
@@ -148,31 +148,30 @@ export async function getSingleJournalEntry(id){
     if (!user) throw new Error("User not found");
 
     const entry = await db.entry.findFirst({
-      where:{
+      where: {
         id,
-        userId : user.id,
+        userId: user.id,
       },
-      include:{
-        collection:{
-          select:{
-            id:true,
-            name:true,
-          }
-        }
-      }
-    })
+      include: {
+        collection: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
 
-    if(!entry){
-      throw new Error("Entry not found!")
+    if (!entry) {
+      throw new Error("Entry not found!");
     }
     return entry;
-
   } catch (error) {
-    throw new Error(error.message)
+    throw new Error(error.message);
   }
 }
 
-export async function deleteJournalEntry(id){
+export async function deleteJournalEntry(id) {
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
@@ -198,9 +197,61 @@ export async function deleteJournalEntry(id){
       where: { id },
     });
 
-    revalidatePath("/dashboard")
+    revalidatePath("/dashboard");
 
     return entry;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function updateJournalEntry(data) {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) throw new Error("User not found");
+
+    // Check if entry exists and belongs to user
+    const existingEntry = await db.entry.findFirst({
+      where: {
+        userId: user.id,
+        id: data.id,
+      },
+    });
+
+    if (!existingEntry) throw new Error("entry not found");
+
+    const mood = MOODS[data.mood.toUpperCase()];
+    if (!mood) throw new Error("Invalid mood");
+
+    // Get new mood image if mood changed
+    let moodImageUrl = existingEntry.moodImageUrl;
+    if (existingEntry.mood !== mood.id) {
+      moodImageUrl = await getPixabayImage(data.moodQuery);
+    }
+
+    // Update the entry
+    const updatedEntry = await db.entry.update({
+      where: { id: data.id },
+      data: {
+        title: data.title,
+        content: data.content,
+        mood: mood.id,
+        moodScore: mood.score,
+        moodImageUrl,
+        collectionId: data.collectionId || null,
+      },
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath(`/journal/${data.id}`);
+
+    return updatedEntry;
   } catch (error) {
     throw new Error(error.message);
   }
