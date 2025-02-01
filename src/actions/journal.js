@@ -171,3 +171,37 @@ export async function getSingleJournalEntry(id){
     throw new Error(error.message)
   }
 }
+
+export async function deleteJournalEntry(id){
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) throw new Error("User not found");
+
+    // Check if entry exists and belongs to user
+    const entry = await db.entry.findFirst({
+      where: {
+        id,
+        userId: user.id,
+      },
+    });
+
+    if (!entry) throw new Error("entry not found");
+
+    // Delete the collection (entries will be cascade deleted)
+    await db.entry.delete({
+      where: { id },
+    });
+
+    revalidatePath("/dashboard")
+
+    return entry;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
