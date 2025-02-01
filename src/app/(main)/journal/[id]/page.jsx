@@ -5,6 +5,7 @@ import { getSingleJournalEntry } from "@/actions/journal";
 import { getMoodById } from "@/app/lib/moods";
 import Image from "next/image";
 import DeleteDialog from "./_components/delete-dialog";
+import EditButton from "./_components/edit-dialog";
 
 const JournalEntryPage = async ({ params }) => {
   const { id } = await params;
@@ -40,7 +41,7 @@ const JournalEntryPage = async ({ params }) => {
             </div>
 
             <div className="flex items-center gap-2">
-              {/* <EditButton entryId={id} /> */}
+              <EditButton entryId={id} />
               <DeleteDialog entryId={id} />
             </div>
           </div>
